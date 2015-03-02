@@ -6,7 +6,7 @@ You use tagging git capability to point importance of a release e.g. v1.0.0
 
 ## Usage
 
-In some of your source code files e.g. main.go 
+In a source code file e.g. main.go 
 
 ```golang
 package main
