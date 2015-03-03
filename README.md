@@ -22,8 +22,8 @@ import (
 )
 
 var (
-  build
-  buildVersion Version = version.ParseGitDescription(build)
+  build string
+  buildVersion = version.ParseGitDescription(build)
 )  
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 
 And the Makefile
 
-```
+```make
 VERSION := $(shell git describe --tags)
 
 install:
