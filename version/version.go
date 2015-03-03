@@ -8,6 +8,7 @@ import (
 
 const (
 	GitDescriptionRegexp = "v(\\d+).(\\d+).(\\d+)-(.*)-([\\d]+)-g(.+)"
+	GitNoTagsFound       = "fatal: No names found, cannot describe anything."
 )
 
 type Version struct {
@@ -21,6 +22,15 @@ type Version struct {
 }
 
 func ParseGitDescription(desc string) Version {
+	if desc == GitNoTagsFound {
+		fmt.Println("No git tags found.")
+
+		return Version{
+			Id:         "0.0.0-prerelease",
+			PreRelease: "prerelease",
+		}
+	}
+
 	r := regexp.MustCompile(GitDescriptionRegexp)
 	matches := r.FindStringSubmatch(desc)
 
@@ -45,6 +55,10 @@ func ParseGitDescription(desc string) Version {
 }
 
 func (v Version) String() string {
-	return fmt.Sprintf("major=%v, minor=%v, patch=%v, prerelease=%v, additional=%v, sha=%v",
+	return v.Id
+}
+
+func (v Version) Desc() string {
+	return fmt.Sprintf("major=%v, minor=%v, patch=%v, prerelease=%v, git-additional=%v, git-sha=%v",
 		v.Major, v.Minor, v.Patch, v.PreRelease, v.GitAdditionalCommits, v.GitShortSha)
 }
