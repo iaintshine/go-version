@@ -2,11 +2,15 @@
 
 ## Requirements 
 
-You use tagging git capability to point importance of a release e.g. v1.0.0
+Package usage requires you to use tagging git capability to point importance of a release.
+Make sure to use semantic versioning when you create a new tag.
+A tag may include *v* prefix e.g. v1.0.0-alpha. 
+
+When no tag is found, and you still use git, it creates a version 0.0.0-prerelease.  
 
 ## Usage
 
-In a source code file e.g. main.go 
+In a source code e.g. *main.go* file 
 
 ```go
 package main
