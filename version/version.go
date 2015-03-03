@@ -7,12 +7,16 @@ import (
 )
 
 const (
-	GitDescriptionRegexp = "v(\\d+).(\\d+).(\\d+)-(.*)-([\\d]+)-g(.+)"
+	GitDescriptionRegexp = "v?(?P<major>\\d+)(.(?P<minor>\\d+)(.(?P<patch>\\d+))?)?(-(?P<pre>.*))?-(?P<add>[\\d]+)-g(?P<sha>.+)"
 	GitNoTagsFound       = "fatal: No names found, cannot describe anything."
 )
 
+var (
+	PreReleaseVersion = Version{Full: "0.0.0-prerelease", PreRelease: "prerelease"}
+)
+
 type Version struct {
-	Id                   string
+	Full                 string
 	Major                int
 	Minor                int
 	Patch                int
@@ -23,12 +27,7 @@ type Version struct {
 
 func ParseGitDescription(desc string) Version {
 	if desc == GitNoTagsFound {
-		fmt.Println("No git tags found.")
-
-		return Version{
-			Id:         "0.0.0-prerelease",
-			PreRelease: "prerelease",
-		}
+		return PreReleaseVersion
 	}
 
 	r := regexp.MustCompile(GitDescriptionRegexp)
@@ -38,24 +37,34 @@ func ParseGitDescription(desc string) Version {
 		return Version{}
 	}
 
-	major, _ := strconv.Atoi(matches[1])
-	minor, _ := strconv.Atoi(matches[2])
-	patch, _ := strconv.Atoi(matches[3])
-	additional, _ := strconv.Atoi(matches[5])
+	lookup := make(map[string]string)
+	groups := r.SubexpNames()
+
+	for i, group := range groups {
+		if group == "" {
+			continue
+		}
+		lookup[group] = matches[i]
+	}
+
+	major, _ := strconv.Atoi(lookup["major"])
+	minor, _ := strconv.Atoi(lookup["minor"])
+	patch, _ := strconv.Atoi(lookup["patch"])
+	additional, _ := strconv.Atoi(lookup["add"])
 
 	return Version{
-		Id:                   desc,
+		Full:                 desc,
 		Major:                major,
 		Minor:                minor,
 		Patch:                patch,
-		PreRelease:           matches[4],
+		PreRelease:           lookup["pre"],
 		GitAdditionalCommits: additional,
-		GitShortSha:          matches[6],
+		GitShortSha:          lookup["sha"],
 	}
 }
 
 func (v Version) String() string {
-	return v.Id
+	return v.Full
 }
 
 func (v Version) Desc() string {
